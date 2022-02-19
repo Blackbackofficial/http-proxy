@@ -1,7 +1,7 @@
 import socket
 import select
-import time
 import sys
+import time
 
 buffer_size = 4096
 delay = 0.0001
@@ -35,7 +35,7 @@ class TheServer:
 
     def main_loop(self):
         self.input_list.append(self.server)
-        while 1:
+        while True:
             time.sleep(delay)
             ss = select.select
             inputready, outputready, exceptready = ss(self.input_list, [], [])
@@ -66,30 +66,25 @@ class TheServer:
 
     def on_close(self):
         print(self.s.getpeername(), "has disconnected")
-        # remove objects from input_list
         self.input_list.remove(self.s)
         self.input_list.remove(self.channel[self.s])
         out = self.channel[self.s]
-        # close the connection with client
-        self.channel[out].close()  # equivalent to do self.s.close()
-        # close the connection with remote server
-        self.channel[self.s].close()
-        # delete both objects from channel dict
+        self.channel[out].close()  # close the connection with client
+        self.channel[self.s].close()  # close the connection with remote server
         del self.channel[out]
         del self.channel[self.s]
 
     def on_recv(self):
         data = self.data
-        # here we can parse and/or modify the data before send forward
-        print(data)
+        data = data.replace(b"\r\nProxy-Connection: Keep-Alive", b"")
+        print(data,"wefoinweioufnjiwefn")
         self.channel[self.s].send(data)
 
 
 if __name__ == '__main__':
     server = TheServer('', 8080)
+
     try:
         server.main_loop()
-
     except KeyboardInterrupt:
-        print("Ctrl C - Stopping server")
         sys.exit(1)
