@@ -59,10 +59,6 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			//
-			//if strings.LastIndex(string(answer), "Transfer-Encoding: chunked") != -1 {
-			//	answer = bytes.Replace(answer, []byte("Transfer-Encoding: chunked"), []byte(""), -1)
-			//}
 
 			err = utils.TlsSendMessage(tlsSrv, answer)
 			if err != nil {

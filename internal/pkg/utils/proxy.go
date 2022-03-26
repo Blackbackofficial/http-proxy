@@ -90,7 +90,7 @@ func GetRequest(conn net.Conn) *models.Request {
 		st += ""
 	}
 
-	fmt.Print("start receiving body\n")
+	fmt.Print("Start receiving body\n")
 	for {
 		if l == 0 {
 			break
@@ -101,7 +101,7 @@ func GetRequest(conn net.Conn) *models.Request {
 			return nil
 		}
 		bBody = append(bBody, bArr...)
-		if n > l-len(bBody)-1 {
+		if n > l-len(bBody) {
 			break
 		}
 	}
@@ -121,7 +121,7 @@ func ReturnResponse(conn net.Conn, answer []byte) {
 	for sentBytes < size {
 		n, err := conn.Write(answer)
 		if err != nil {
-			fmt.Println("some error in sending data", n)
+			fmt.Println("Error in sending data", n)
 		}
 		sentBytes += n
 	}
@@ -133,7 +133,7 @@ func ProxyRequest(conn net.Conn, msg []byte) []byte {
 	for sentBytes < size {
 		n, err := conn.Write(msg)
 		if err != nil {
-			fmt.Println("some error in sending data", n)
+			fmt.Println("Error in sending data", n)
 		}
 		sentBytes += n
 	}
