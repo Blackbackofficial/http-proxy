@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"http-proxy/internal/pkg/utils"
 	"log"
 	"math/rand"
@@ -27,6 +28,7 @@ func main() {
 			conn.Write([]byte("HTTP/1.0 200 Connection established\r\nProxy-agent: curl/7.79.1\r\n\r\n"))
 
 			path, _ := filepath.Abs("")
+			fmt.Print(path, "HIIIII")
 			err = exec.Command(path+"/certs/gen_cert.sh", req.Host, strconv.Itoa(rand.Int())).Run()
 			if err != nil {
 				log.Fatal(err)
