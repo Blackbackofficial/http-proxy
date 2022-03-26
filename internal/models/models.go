@@ -1,12 +1,12 @@
 package models
 
 type Request struct {
-	FullMsg []byte
+	Message []byte
 	Secure  bool
 	Host    string
 	Port    string
 }
 
 type Response struct {
-	FullMsg []byte
+	Msg []byte
 }

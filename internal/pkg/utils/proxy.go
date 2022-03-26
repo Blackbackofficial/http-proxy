@@ -27,7 +27,7 @@ func ParseSecure(headers []byte) bool {
 	return true
 }
 
-func ParsePort(req *models.Request) *models.Request {
+func ParsePort(req models.Request) models.Request {
 	re := regexp.MustCompile(`(?m):\d+`)
 	res := re.FindAllString(req.Host, -1)
 	if res == nil {
@@ -46,11 +46,7 @@ func ParseLength(headers []byte) int {
 	return l
 }
 
-func GetRequest(conn net.Conn) *models.Request {
-	req := &models.Request{
-		Port: ":80",
-	}
-	fullMsg := make([]byte, 0, 10)
+func GetRequest(conn net.Conn) models.Request {
 	var bMessage []byte
 	var bBody []byte
 
@@ -58,7 +54,7 @@ func GetRequest(conn net.Conn) *models.Request {
 		bArr := make([]byte, 10, 10)
 		n, err := conn.Read(bArr)
 		if err != nil || n == 0 {
-			return nil
+			return models.Request{}
 		}
 		bMessage = append(bMessage, bArr...)
 		if strings.Contains(string(bMessage), "\r\n\r\n") {
@@ -68,11 +64,6 @@ func GetRequest(conn net.Conn) *models.Request {
 			break
 		}
 	}
-
-	req.Secure = ParseSecure(bMessage)
-
-	l := ParseLength(bMessage)
-	host := ParseHost(bMessage)
 
 	if strings.LastIndex(string(bMessage), "Proxy-Connection: Keep-Alive\r\n") != -1 {
 		bMessage = bytes.Replace(bMessage, []byte("Proxy-Connection: Keep-Alive\r\n"), []byte(""), -1)
@@ -85,11 +76,9 @@ func GetRequest(conn net.Conn) *models.Request {
 			j++
 		}
 		bMessage = bytes.Replace(bMessage, bMessage[i:j], []byte(""), 1)
-
-		st := string(bMessage)
-		st += ""
 	}
 
+	l := ParseLength(bMessage)
 	fmt.Print("Start receiving body\n")
 	for {
 		if l == 0 {
@@ -98,7 +87,7 @@ func GetRequest(conn net.Conn) *models.Request {
 		bArr := make([]byte, l, l)
 		n, err := conn.Read(bArr)
 		if err != nil || n == 0 {
-			return nil
+			return models.Request{}
 		}
 		bBody = append(bBody, bArr...)
 		if n > l-len(bBody) {
@@ -107,18 +96,15 @@ func GetRequest(conn net.Conn) *models.Request {
 	}
 	fmt.Print("Received body:\n", string(bBody))
 
+	fullMsg := make([]byte, 0, 10)
 	fullMsg = append(fullMsg, bMessage...)
 	fullMsg = append(fullMsg, bBody...)
-	req.FullMsg = fullMsg
-	req.Host = host
-
-	return req
+	return models.Request{Port: ":80", Message: fullMsg, Secure: ParseSecure(bMessage), Host: ParseHost(bMessage)}
 }
 
 func ReturnResponse(conn net.Conn, answer []byte) {
-	size := len(answer)
 	sentBytes := 0
-	for sentBytes < size {
+	for sentBytes < len(answer) {
 		n, err := conn.Write(answer)
 		if err != nil {
 			fmt.Println("Error in sending data", n)
@@ -128,9 +114,8 @@ func ReturnResponse(conn net.Conn, answer []byte) {
 }
 
 func ProxyRequest(conn net.Conn, msg []byte) []byte {
-	size := len(msg)
 	sentBytes := 0
-	for sentBytes < size {
+	for sentBytes < len(msg) {
 		n, err := conn.Write(msg)
 		if err != nil {
 			fmt.Println("Error in sending data", n)
@@ -138,7 +123,7 @@ func ProxyRequest(conn net.Conn, msg []byte) []byte {
 		sentBytes += n
 	}
 	answer := GetRequest(conn)
-	return answer.FullMsg
+	return answer.Message
 }
 
 func TlsReadMessage(conn net.Conn) ([]byte, error) {

@@ -17,11 +17,11 @@ func main() {
 		if err != nil {
 			log.Println(err)
 		}
+
 		conn, _ := ln.Accept()
-
 		req := utils.GetRequest(conn)
-
 		req = utils.ParsePort(req)
+
 		if req.Secure { // https
 			req.Host = req.Host[:len(req.Host)-4]
 			conn.Write([]byte("HTTP/1.0 200 Connection established\r\nProxy-agent: curl/7.79.1\r\n\r\n"))
@@ -67,15 +67,13 @@ func main() {
 
 			tlsConnTo.Close()
 			tlsSrv.Close()
-
 		} else { // http
 			connTo, err := net.Dial("tcp", req.Host+req.Port)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			answer := utils.ProxyRequest(connTo, req.FullMsg)
-			utils.ReturnResponse(conn, answer)
+			utils.ReturnResponse(conn, utils.ProxyRequest(connTo, req.Message))
 		}
 
 		conn.Close()
