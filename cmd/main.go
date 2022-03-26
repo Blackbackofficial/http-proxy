@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"crypto/tls"
 	"http-proxy/internal/pkg/utils"
 	"log"
@@ -10,7 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 func main() {
@@ -22,23 +20,21 @@ func main() {
 		conn, _ := ln.Accept()
 
 		req := utils.GetRequest(conn)
-		ss := string(req.FullMsg)
-		ss += ""
 
-		port := utils.ParsePort(req.Host)
-		if req.Secure {
+		req = utils.ParsePort(req)
+		if req.Secure { // https
 			req.Host = req.Host[:len(req.Host)-4]
-			conn.Write([]byte("HTTP/1.0 200 Connection established\r\nProxy-agent: Golang-Proxy\r\n\r\n"))
+			conn.Write([]byte("HTTP/1.0 200 Connection established\r\nProxy-agent: curl/7.79.1\r\n\r\n"))
 
 			path, _ := filepath.Abs("")
-			err = exec.Command(path+"/gen_cert.sh", req.Host, strconv.Itoa(rand.Int())).Run()
+			err = exec.Command(path+"/certs/gen_cert.sh", req.Host, strconv.Itoa(rand.Int())).Run()
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
-			cert, err := tls.LoadX509KeyPair(path+"/hck.crt", path+"/cert.key")
+			cert, err := tls.LoadX509KeyPair(path+"/certs/nck.crt", path+"/certs/cert.key")
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			tlsCfg := &tls.Config{Certificates: []tls.Certificate{cert}}
@@ -46,43 +42,40 @@ func main() {
 
 			msg, err := utils.TlsReadMessage(tlsSrv)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			tlsConnTo, err := tls.Dial("tcp", req.Host+":443", tlsCfg)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			err = utils.TlsSendMessage(tlsConnTo, msg)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			answer, err := utils.TlsReadMessage(tlsConnTo)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
-
-			if strings.LastIndex(string(answer), "Transfer-Encoding: chunked") != -1 {
-				answer = bytes.Replace(answer, []byte("Transfer-Encoding: chunked"), []byte(""), -1)
-			}
+			//
+			//if strings.LastIndex(string(answer), "Transfer-Encoding: chunked") != -1 {
+			//	answer = bytes.Replace(answer, []byte("Transfer-Encoding: chunked"), []byte(""), -1)
+			//}
 
 			err = utils.TlsSendMessage(tlsSrv, answer)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			tlsConnTo.Close()
 			tlsSrv.Close()
 
-		} else {
-			if port != "" {
-				req.Port = ""
-			}
+		} else { // http
 			connTo, err := net.Dial("tcp", req.Host+req.Port)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			answer := utils.ProxyRequest(connTo, req.FullMsg)
@@ -91,7 +84,5 @@ func main() {
 
 		conn.Close()
 		ln.Close()
-		ln = nil
-		conn = nil
 	}
 }

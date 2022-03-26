@@ -27,13 +27,14 @@ func ParseSecure(headers []byte) bool {
 	return true
 }
 
-func ParsePort(url string) string {
+func ParsePort(req *models.Request) *models.Request {
 	re := regexp.MustCompile(`(?m):\d+`)
-	res := re.FindAllString(url, -1)
+	res := re.FindAllString(req.Host, -1)
 	if res == nil {
-		return ""
+		return req
 	}
-	return res[0]
+	req.Port = ""
+	return req
 }
 
 func ParseLength(headers []byte) int {
@@ -57,8 +58,6 @@ func GetRequest(conn net.Conn) *models.Request {
 		bArr := make([]byte, 10, 10)
 		n, err := conn.Read(bArr)
 		if err != nil || n == 0 {
-			fmt.Print(err)
-			fmt.Print(n)
 			return nil
 		}
 		bMessage = append(bMessage, bArr...)
@@ -99,8 +98,6 @@ func GetRequest(conn net.Conn) *models.Request {
 		bArr := make([]byte, l, l)
 		n, err := conn.Read(bArr)
 		if err != nil || n == 0 {
-			fmt.Print(err)
-			fmt.Print(n)
 			return nil
 		}
 		bBody = append(bBody, bArr...)
