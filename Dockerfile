@@ -3,12 +3,11 @@ FROM golang:1.18-alpine AS lang
 ADD . /opt/app
 WORKDIR /opt/app
 
-RUN CGO_ENABLED=0 go build ./cmd/main.go
+RUN GO111MODULE="on" CGO_ENABLED=0 GOOS=linux go build ./cmd/main.go
 
 FROM ubuntu:20.04
 
-RUN apt-get -y update
-RUN apt-get install -y tzdata
+RUN apt-get -y update && apt-get install -y tzdata -y ca-certificates && update-ca-certificates
 
 ENV PGVER 12
 RUN apt-get -y update && apt-get install -y postgresql-$PGVER
@@ -21,6 +20,7 @@ RUN /etc/init.d/postgresql start &&\
     /etc/init.d/postgresql stop
 
 EXPOSE 5432
+EXPOSE 8080
 
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
@@ -30,6 +30,6 @@ WORKDIR /usr/src/app
 
 COPY . .
 COPY --from=lang /opt/app/ .
-EXPOSE 8080
+
 ENV PGPASSWORD docker
-CMD service postgresql start &&  psql -h localhost -d docker -U docker -p 5432 -a -q -f ./db/init.sql && cd ./certs && chmod 777 ./gen_ca.sh && chmod 777 ./gen_cert.sh && ./gen_ca.sh && cd .. && ./main
+CMD service postgresql start && psql -h localhost -d docker -U docker -p 5432 -a -q -f ./db/init.sql && ./main
