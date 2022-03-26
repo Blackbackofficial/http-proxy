@@ -18,3 +18,7 @@
 .idea/
 .DS_Store
 main
+certs/ca.crt
+certs/ca.key
+certs/cert.key
+certs/nck.crt
