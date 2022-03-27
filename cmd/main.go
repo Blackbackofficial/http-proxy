@@ -3,9 +3,11 @@ package main
 import (
 	"github.com/BurntSushi/toml"
 	"github.com/gorilla/mux"
-	"http-proxy/internal/pkg/proxy/delivery"
-	"http-proxy/internal/pkg/proxy/repo"
-	"http-proxy/internal/pkg/proxy/usecase"
+	pDelivery "http-proxy/internal/pkg/proxy/delivery"
+	pRepo "http-proxy/internal/pkg/proxy/repo"
+	"http-proxy/internal/pkg/repeater/delivery"
+	"http-proxy/internal/pkg/repeater/repo"
+	"http-proxy/internal/pkg/repeater/usecase"
 	"http-proxy/internal/pkg/utils"
 	"log"
 	"net/http"
@@ -42,24 +44,24 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go func() {
-		log.Fatal(utils.ListenAndServe(conf.Proxy.Port))
-	}()
-
-	muxRoute := mux.NewRouter()
-
 	db, err := utils.DBConnect(conf.DB.Username, conf.DB.DbName, conf.DB.Password, conf.DB.Host, conf.DB.Port)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fRepo := repo.NewRepoPostgres(db)
-	fUsecase := usecase.NewRepoUsecase(fRepo)
-	fHandler := delivery.NewForumHandler(fUsecase)
+	newRepo := pRepo.NewRepoPostgres(db)
+	proxyServer := pDelivery.NewProxyServer(newRepo, ":"+conf.Proxy.Port)
+	go log.Fatal(proxyServer.ListenAndServe())
+
+	muxRoute := mux.NewRouter()
+
+	rRepo := repo.NewRepoPostgres(db)
+	rUsecase := usecase.NewRepoUsecase(rRepo)
+	handler := delivery.NewForumHandler(rUsecase)
 
 	forum := muxRoute.PathPrefix("/api/v1").Subrouter()
 	{
-		forum.HandleFunc("/forum/create", fHandler.AllRequest).Methods(http.MethodGet)
+		forum.HandleFunc("/forum/create", handler.AllRequest).Methods(http.MethodGet)
 	}
 
 	http.Handle("/", muxRoute)

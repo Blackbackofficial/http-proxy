@@ -1,7 +1,11 @@
 package proxy
 
-type UseCase interface {
-}
+import (
+	"http-proxy/internal/models"
+	"net/http"
+)
 
-type Repository interface {
+type RepoProxy interface {
+	SaveRequest(r *http.Request) (int, error)
+	SaveResponse(reqId int, resp *http.Response) (*models.Response, error)
 }
