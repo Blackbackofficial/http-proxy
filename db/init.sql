@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS response
 (
     id           SERIAL NOT NULL PRIMARY KEY,
-    req_id       SERIAL REFERENCES request (id) NOT NULL,
+    request_id   SERIAL REFERENCES request (id) NOT NULL,
     code         INT                            NOT NULL,
     message      text                           NOT NULL,
     header       text        default '',
