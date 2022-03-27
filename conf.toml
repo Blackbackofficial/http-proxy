@@ -1,0 +1,16 @@
+title = "config"
+
+[web-server]
+host = "127.0.0.1"
+port = "8000"
+
+[proxy-server]
+host = "127.0.0.1"
+port = "8080"
+
+[database]
+dbname = "docker"
+username = "docker"
+password = "docker"
+host = "127.0.0.1"
+port = "5432"

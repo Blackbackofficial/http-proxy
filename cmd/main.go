@@ -1,82 +1,67 @@
 package main
 
 import (
-	"crypto/tls"
+	"github.com/BurntSushi/toml"
+	"github.com/gorilla/mux"
+	"http-proxy/internal/pkg/proxy/delivery"
+	"http-proxy/internal/pkg/proxy/repo"
+	"http-proxy/internal/pkg/proxy/usecase"
 	"http-proxy/internal/pkg/utils"
 	"log"
-	"math/rand"
-	"net"
-	"os/exec"
-	"path/filepath"
-	"strconv"
+	"net/http"
 )
 
+type tomlConfig struct {
+	Title string
+	Web   webServer   `toml:"web-server"`
+	Proxy proxyServer `toml:"proxy-server"`
+	DB    database    `toml:"database"`
+}
+
+type webServer struct {
+	Host string `toml:"host"`
+	Port string
+}
+
+type proxyServer struct {
+	Host string
+	Port string
+}
+
+type database struct {
+	DbName   string
+	Username string
+	Password string
+	Host     string
+	Port     string
+}
+
 func main() {
-	for {
-		ln, err := net.Listen("tcp", ":8080")
-		if err != nil {
-			log.Println(err)
-		}
-
-		conn, _ := ln.Accept()
-		req := utils.GetRequest(conn)
-		req = utils.ParsePort(req)
-
-		if req.Secure { // https
-			req.Host = req.Host[:len(req.Host)-4]
-			conn.Write([]byte("HTTP/1.0 200 Connection established\r\nProxy-agent: curl/7.79.1\r\n\r\n"))
-
-			path, _ := filepath.Abs("")
-			err = exec.Command(path+"/certs/gen_cert.sh", req.Host, strconv.Itoa(rand.Int())).Run()
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			cert, err := tls.LoadX509KeyPair(path+"/certs/nck.crt", path+"/certs/cert.key")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			tlsCfg := &tls.Config{Certificates: []tls.Certificate{cert}}
-			tlsSrv := tls.Server(conn, tlsCfg)
-
-			msg, err := utils.TlsReadMessage(tlsSrv)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			tlsConnTo, err := tls.Dial("tcp", req.Host+":443", tlsCfg)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			err = utils.TlsSendMessage(tlsConnTo, msg)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			answer, err := utils.TlsReadMessage(tlsConnTo)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			err = utils.TlsSendMessage(tlsSrv, answer)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			tlsConnTo.Close()
-			tlsSrv.Close()
-		} else { // http
-			connTo, err := net.Dial("tcp", req.Host+req.Port)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			utils.ReturnResponse(conn, utils.ProxyRequest(connTo, req.Message))
-		}
-
-		conn.Close()
-		ln.Close()
+	var conf tomlConfig
+	if _, err := toml.DecodeFile("./conf.toml", &conf); err != nil {
+		log.Fatal(err)
 	}
+
+	go func() {
+		log.Fatal(utils.ListenAndServe(conf.Proxy.Port))
+	}()
+
+	muxRoute := mux.NewRouter()
+
+	db, err := utils.DBConnect(conf.DB.Username, conf.DB.DbName, conf.DB.Password, conf.DB.Host, conf.DB.Port)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fRepo := repo.NewRepoPostgres(db)
+	fUsecase := usecase.NewRepoUsecase(fRepo)
+	fHandler := delivery.NewForumHandler(fUsecase)
+
+	forum := muxRoute.PathPrefix("/api/v1").Subrouter()
+	{
+		forum.HandleFunc("/forum/create", fHandler.AllRequest).Methods(http.MethodGet)
+	}
+
+	http.Handle("/", muxRoute)
+	log.Print(http.ListenAndServe(":"+conf.Web.Port, muxRoute))
 }
