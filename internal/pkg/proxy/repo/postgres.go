@@ -67,12 +67,14 @@ func (rp *repoPostgres) SaveResponse(reqId int, resp *http.Response) (models.Res
 		return models.Response{}, err
 	}
 
+	cookies, _ := utils.CookiesToString(resp.Cookies())
 	response := models.Response{
 		Id:        respId,
 		RequestId: reqId,
 		Code:      resp.StatusCode,
 		Message:   resp.Status[4:],
 		Header:    utils.StrToHeader(respHeaders),
+		Cookies:   cookies,
 		Body:      string(respBody),
 	}
 

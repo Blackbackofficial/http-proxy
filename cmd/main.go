@@ -58,14 +58,14 @@ func main() {
 	muxRoute := mux.NewRouter()
 
 	rRepo := repo.NewRepoPostgres(db)
-	rUsecase := usecase.NewRepoUsecase(rRepo)
+	rUsecase := usecase.NewRepoUsecase(rRepo, proxyServ)
 	handler := delivery.NewRepeaterHandler(rUsecase)
 
 	repeater := muxRoute.PathPrefix("/api/v1").Subrouter()
 	{
 		repeater.HandleFunc("/requests", handler.AllRequests).Methods(http.MethodGet)
 		repeater.HandleFunc("/requests/{id}", handler.GetRequest).Methods(http.MethodGet)
-		repeater.HandleFunc("/repeat/{id}", handler.GetRequest).Methods(http.MethodGet)
+		repeater.HandleFunc("/repeat/{id}", handler.RepeatRequest).Methods(http.MethodGet)
 	}
 
 	http.Handle("/", muxRoute)

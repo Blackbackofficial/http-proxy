@@ -40,3 +40,21 @@ func (h *Handler) GetRequest(w http.ResponseWriter, r *http.Request) {
 	requests, status := h.uc.GetRequest(id)
 	middleware.Response(w, status, requests)
 }
+
+// RepeatRequest /repeat/{id}
+func (h *Handler) RepeatRequest(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	ids, found := vars["id"]
+	if !found {
+		middleware.Response(w, models.NotFound, nil)
+		return
+	}
+	id, err := strconv.Atoi(ids)
+	if err != nil {
+		middleware.Response(w, models.InternalError, nil)
+		return
+	}
+
+	requests, status := h.uc.RepeatRequest(id)
+	middleware.Response(w, status, requests)
+}
