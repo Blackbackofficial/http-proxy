@@ -28,3 +28,8 @@ Parsing requests and response:
 2. `GET /api/v1/requests/{id}` – Output 1 request;
 3. `GET /api/v1/repeat/{id}` – Resubmit request;
 4. `GET /api/v1/scan/{id}` – Request vulnerability scanner (param-miner);
+
+### Param-miner
+Param-miner - add to the request in turn each GET parameter from the [params from PortSwigger](https://github.com/PortSwigger/param-miner/blob/master/resources/params) dictionary with a random value (?param=shefuisehfuishe). 
+<br/><br/>
+We are looking for the specified random value in the response, if found, we display its name of the hidden parameter.

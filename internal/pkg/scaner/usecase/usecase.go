@@ -97,12 +97,12 @@ func (uc *UseCase) Scan(id int) models.StatusCode {
 
 	randString := utils.RandStringRunes(rand.Intn(6))
 	for _, param := range params {
-		resReqWithParam := req
-		query := resReqWithParam.URL.Query()
+		resParam := req
+		query := resParam.URL.Query()
 		query.Add(param, randString)
-		resReqWithParam.URL.RawQuery = query.Encode()
+		resParam.URL.RawQuery = query.Encode()
 
-		response, err := http.DefaultTransport.RoundTrip(resReqWithParam)
+		response, err := http.DefaultTransport.RoundTrip(resParam)
 		if err != nil {
 			continue
 		}
