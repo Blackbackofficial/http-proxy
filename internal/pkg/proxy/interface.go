@@ -10,5 +10,5 @@ type RepoProxy interface {
 	SaveResponse(reqId int, resp *http.Response) (models.Response, error)
 }
 type HandlerProxy interface {
-	ProxyHTTP(r *http.Request) models.Response
+	Proxy(r *http.Request) models.Response
 }

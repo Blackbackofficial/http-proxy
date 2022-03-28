@@ -167,7 +167,7 @@ func (ps *StartServer) proxyHTTPS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ps *StartServer) ProxyHTTP(r *http.Request) models.Response {
+func (ps *StartServer) Proxy(r *http.Request) models.Response {
 	r.Header.Del("Proxy-Connection")
 
 	reqId, err := ps.repo.SaveRequest(r)

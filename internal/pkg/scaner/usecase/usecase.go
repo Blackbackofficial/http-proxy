@@ -41,8 +41,7 @@ func (uc *UseCase) RepeatRequest(id int) (models.Response, models.StatusCode) {
 	for key, value := range request.Header {
 		req.Header.Add(key, value)
 	}
-
-	resp := uc.hProxy.ProxyHTTP(req)
+	resp := uc.hProxy.Proxy(req)
 
 	return resp, models.Okey
 }
