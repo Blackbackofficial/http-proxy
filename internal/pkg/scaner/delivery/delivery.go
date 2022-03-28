@@ -58,3 +58,21 @@ func (h *Handler) RepeatRequest(w http.ResponseWriter, r *http.Request) {
 	requests, status := h.uc.RepeatRequest(id)
 	middleware.Response(w, status, requests)
 }
+
+// Scan /scan/{id}
+func (h *Handler) Scan(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	ids, found := vars["id"]
+	if !found {
+		middleware.Response(w, models.NotFound, nil)
+		return
+	}
+	id, err := strconv.Atoi(ids)
+	if err != nil {
+		middleware.Response(w, models.InternalError, nil)
+		return
+	}
+
+	status := h.uc.Scan(id)
+	middleware.Response(w, status, nil)
+}

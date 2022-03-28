@@ -66,7 +66,7 @@ func main() {
 		repeater.HandleFunc("/requests", handler.AllRequests).Methods(http.MethodGet)
 		repeater.HandleFunc("/requests/{id}", handler.GetRequest).Methods(http.MethodGet)
 		repeater.HandleFunc("/repeat/{id}", handler.RepeatRequest).Methods(http.MethodGet)
-		repeater.HandleFunc("/scan/{id}", handler.RepeatRequest).Methods(http.MethodGet)
+		repeater.HandleFunc("/scan/{id}", handler.Scan).Methods(http.MethodGet)
 	}
 
 	http.Handle("/", muxRoute)

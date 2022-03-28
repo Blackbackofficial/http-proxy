@@ -27,4 +27,4 @@ Parsing requests and response:
 1. `GET /api/v1/requests` – List of requests;
 2. `GET /api/v1/requests/{id}` – Output 1 request;
 3. `GET /api/v1/repeat/{id}` – Resubmit request;
-4. `GET /api/v1/scan/{id}` – Scan request;
+4. `GET /api/v1/scan/{id}` – Request vulnerability scanner (param-miner);
