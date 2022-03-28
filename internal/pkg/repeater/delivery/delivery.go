@@ -14,4 +14,8 @@ func NewRepeaterHandler(RepeaterUseCase repeater.UseCase) *Handler {
 }
 
 func (h *Handler) AllRequest(w http.ResponseWriter, r *http.Request) {
+	//
+	//forumS := models.Response{Slug: slug}
+	//forumS, status := h.uc.GetForum(forumS)
+	//utils.Response(w, status, forumS)
 }

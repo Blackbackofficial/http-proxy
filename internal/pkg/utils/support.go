@@ -40,12 +40,10 @@ func GenTLSConf(host, URL string) (tls.Config, error) {
 	err := exec.Command(path+"/certs/gen_cert.sh", host, strconv.Itoa(rand.Int())).Run()
 	if err != nil {
 		log.Fatal(err)
-		return tls.Config{}, err
 	}
 
 	tlsCert, err := tls.LoadX509KeyPair(path+"/certs/nck.crt", path+"/certs/cert.key")
 	if err != nil {
-		log.Println("error loading pair", err)
 		return tls.Config{}, err
 	}
 
@@ -74,7 +72,7 @@ func DBConnect(Username, DBName, Password, DBHost, DBPort string) (*pgx.ConnPool
 		AcquireTimeout: 0,
 	})
 	if err != nil {
-		log.Fatalf("Error %s during connection to database", err)
+		log.Fatalf("Error %s connection to db", err)
 	}
 	return pool, nil
 }

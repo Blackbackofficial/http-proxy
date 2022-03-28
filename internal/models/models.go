@@ -18,3 +18,7 @@ type Response struct {
 	Header    map[string]string `json:"header"`
 	Body      string            `json:"body"`
 }
+
+type Error struct {
+	Message string `json:"message"`
+}

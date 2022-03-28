@@ -109,7 +109,6 @@ func (ps *StartServer) proxyHTTPS(w http.ResponseWriter, r *http.Request) {
 
 	remoteConn, err := tls.Dial("tcp", r.URL.Host, &tlsConfig)
 	if err != nil {
-		log.Println(err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
