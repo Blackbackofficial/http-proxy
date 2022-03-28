@@ -63,7 +63,8 @@ func main() {
 
 	repeater := muxRoute.PathPrefix("/api/v1").Subrouter()
 	{
-		repeater.HandleFunc("/requests", handler.AllRequest).Methods(http.MethodGet)
+		repeater.HandleFunc("/requests", handler.AllRequests).Methods(http.MethodGet)
+		repeater.HandleFunc("/requests/{id}", handler.GetRequest).Methods(http.MethodGet)
 	}
 
 	http.Handle("/", muxRoute)

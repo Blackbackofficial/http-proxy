@@ -3,9 +3,11 @@ package scaner
 import "http-proxy/internal/models"
 
 type UseCase interface {
-	GetRequests() ([]models.Request, models.StatusCode)
+	AllRequests() ([]models.Request, models.StatusCode)
+	GetRequest(id int) (models.Request, models.StatusCode)
 }
 
 type Repository interface {
-	GetRequests() ([]models.Request, models.StatusCode)
+	AllRequests() ([]models.Request, models.StatusCode)
+	GetRequest(id int) (models.Request, models.StatusCode)
 }

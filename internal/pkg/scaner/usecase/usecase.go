@@ -13,6 +13,10 @@ func NewRepoUsecase(repo scaner.Repository) scaner.UseCase {
 	return &UseCase{repo: repo}
 }
 
-func (uc *UseCase) GetRequests() ([]models.Request, models.StatusCode) {
-	return uc.repo.GetRequests()
+func (uc *UseCase) AllRequests() ([]models.Request, models.StatusCode) {
+	return uc.repo.AllRequests()
+}
+
+func (uc *UseCase) GetRequest(id int) (models.Request, models.StatusCode) {
+	return uc.repo.GetRequest(id)
 }
