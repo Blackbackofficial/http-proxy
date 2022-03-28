@@ -2,8 +2,10 @@ package utils
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"github.com/jackc/pgx"
+	"http-proxy/internal/models"
 	"log"
 	"math/rand"
 	"net/http"
@@ -75,4 +77,16 @@ func DBConnect(Username, DBName, Password, DBHost, DBPort string) (*pgx.ConnPool
 		log.Fatalf("Error %s connection to db", err)
 	}
 	return pool, nil
+}
+
+func CookiesToString(masC []*http.Cookie) (string, error) {
+	arrCookies := make([]models.Cookies, 0)
+	for _, v := range masC {
+		arrCookies = append(arrCookies, models.Cookies{Key: v.Name, Value: v.Value})
+	}
+	b, err := json.Marshal(arrCookies)
+	if err != nil {
+		return "", err
+	}
+	return string(b[:]), nil
 }

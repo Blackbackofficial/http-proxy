@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	SelectAllFromRequest = "SELECT id, method, scheme, host, path, header, body FROM request;"
-	SelectOneFromRequest = "SELECT id, method, scheme, host, path, header, body FROM request WHERE id = $1;"
+	SelectAllFromRequest = "SELECT id, method, scheme, host, path, cookies, header, body FROM request;"
+	SelectOneFromRequest = "SELECT id, method, scheme, host, path, cookies, header, body FROM request WHERE id = $1;"
 )
 
 type repoPostgres struct {
@@ -31,7 +31,7 @@ func (r *repoPostgres) AllRequests() ([]models.Request, models.StatusCode) {
 	for rows.Next() {
 		req := models.Request{}
 		header := ""
-		err = rows.Scan(&req.Id, &req.Method, &req.Scheme, &req.Host, &req.Path, &header, &req.Body)
+		err = rows.Scan(&req.Id, &req.Method, &req.Scheme, &req.Host, &req.Path, &req.Cookies, &header, &req.Body)
 		if err != nil {
 			return requests, models.InternalError
 		}
@@ -46,7 +46,7 @@ func (r *repoPostgres) GetRequest(id int) (models.Request, models.StatusCode) {
 	header := ""
 
 	row := r.Conn.QueryRow(SelectOneFromRequest, id)
-	err := row.Scan(&req.Id, &req.Method, &req.Scheme, &req.Host, &req.Path, &header, &req.Body)
+	err := row.Scan(&req.Id, &req.Method, &req.Scheme, &req.Host, &req.Path, &req.Cookies, &header, &req.Body)
 	if err != nil {
 		return models.Request{}, models.NotFound
 	}

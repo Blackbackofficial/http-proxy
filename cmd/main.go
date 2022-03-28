@@ -65,6 +65,7 @@ func main() {
 	{
 		repeater.HandleFunc("/requests", handler.AllRequests).Methods(http.MethodGet)
 		repeater.HandleFunc("/requests/{id}", handler.GetRequest).Methods(http.MethodGet)
+		repeater.HandleFunc("/repeat/{id}", handler.GetRequest).Methods(http.MethodGet)
 	}
 
 	http.Handle("/", muxRoute)
