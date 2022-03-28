@@ -7,8 +7,8 @@ Web-api deployed on port 8000
 
 ### Examples proxy requests
 
-* HTTP `curl -x http://127.0.0.1:8080 http://mail.ru`
-* HTTPS `curl -k https://mail.ru/ -x http://127.0.0.1:8080/ -vvv`
+* HTTP `curl -x http://127.0.0.1:8080 https://a06367.ru/`
+* HTTPS `curl -k https://a06367.ru/ -x http://127.0.0.1:8080/ -vvv`
 
 ### Build
 
