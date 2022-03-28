@@ -50,18 +50,18 @@ func main() {
 	}
 
 	newRepo := pRepo.NewRepoPostgres(db)
-	proxyServer := pDelivery.NewProxyServer(newRepo, ":"+conf.Proxy.Port)
-	go log.Fatal(proxyServer.ListenAndServe())
+	proxyServ := pDelivery.NewProxyServer(newRepo, ":"+conf.Proxy.Port)
+	go log.Fatal(proxyServ.ListenAndServe())
 
 	muxRoute := mux.NewRouter()
 
 	rRepo := repo.NewRepoPostgres(db)
 	rUsecase := usecase.NewRepoUsecase(rRepo)
-	handler := delivery.NewForumHandler(rUsecase)
+	handler := delivery.NewRepeaterHandler(rUsecase)
 
-	forum := muxRoute.PathPrefix("/api/v1").Subrouter()
+	repeater := muxRoute.PathPrefix("/api/v1").Subrouter()
 	{
-		forum.HandleFunc("/forum/create", handler.AllRequest).Methods(http.MethodGet)
+		repeater.HandleFunc("/requests", handler.AllRequest).Methods(http.MethodGet)
 	}
 
 	http.Handle("/", muxRoute)

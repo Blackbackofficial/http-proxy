@@ -9,8 +9,8 @@ type Handler struct {
 	uc repeater.UseCase
 }
 
-func NewForumHandler(ForumUseCase repeater.UseCase) *Handler {
-	return &Handler{uc: ForumUseCase}
+func NewRepeaterHandler(RepeaterUseCase repeater.UseCase) *Handler {
+	return &Handler{uc: RepeaterUseCase}
 }
 
 func (h *Handler) AllRequest(w http.ResponseWriter, r *http.Request) {
