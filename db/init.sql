@@ -17,6 +17,6 @@ CREATE TABLE IF NOT EXISTS response
     code         INT                            NOT NULL,
     message      text                           NOT NULL,
     cookies      text                           NOT NULL,
-    header       text        default '',
-    body         text        default ''
+    header       text                           default '',
+    body         text                           default ''
 );

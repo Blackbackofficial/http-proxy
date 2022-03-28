@@ -15,6 +15,8 @@ import (
 	"strings"
 )
 
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
 func HeadToStr(headers http.Header) string {
 	var stringHeaders string
 	for key, values := range headers {
@@ -90,8 +92,6 @@ func CookiesToString(masC []*http.Cookie) (string, error) {
 	}
 	return string(b[:]), nil
 }
-
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func RandStringRunes(n int) string {
 	b := make([]rune, n)

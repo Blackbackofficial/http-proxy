@@ -21,6 +21,7 @@ RUN /etc/init.d/postgresql start &&\
 
 EXPOSE 5432
 EXPOSE 8080
+EXPOSE 8000
 
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 

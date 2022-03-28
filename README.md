@@ -1,20 +1,21 @@
 # http-proxy
 
 ## Description:
+http-proxy deployed on port 8080, proxying http and https requests
+<br/><br/>
+Web-api deployed on port 8000 && implemented param-miner vulnerability scanner
 
-http proxy deployed on port 8080, proxying http and https requests
-Web-api deployed on port 8000
 
 ### Examples proxy requests
-
-* HTTP `curl -x http://127.0.0.1:8080 https://a06367.ru/`
+* HTTP `curl -x http://127.0.0.1:8080 http://a06367.ru/`
 * HTTPS `curl -k https://a06367.ru/ -x http://127.0.0.1:8080/ -vvv`
 
 ### Build
+Certificates are generated and docker is started
 
 `./build.sh`
 
-### API 
+### API
 Parsing requests and response:
 * HTTP method (GET/POST/PUT/HEAD)
 * Path and GET parameters
@@ -30,6 +31,6 @@ Parsing requests and response:
 4. `GET /api/v1/scan/{id}` – Request vulnerability scanner (param-miner);
 
 ### Param-miner
-Param-miner - add to the request in turn each GET parameter from the [params from PortSwigger](https://github.com/PortSwigger/param-miner/blob/master/resources/params) dictionary with a random value (?param=shefuisehfuishe). 
+Param-miner - add to the request in turn each GET parameter from the [params from PortSwigger](https://github.com/PortSwigger/param-miner/blob/master/resources/params) dictionary with a random value (?param=shefuisehfuishe) 
 <br/><br/>
 We are looking for the specified random value in the response, if found, we display its name of the hidden parameter.
