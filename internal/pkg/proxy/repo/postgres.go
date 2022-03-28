@@ -39,12 +39,12 @@ func (rp *repoPostgres) SaveRequest(r *http.Request) (int, error) {
 	return reqId, err
 }
 
-func (rp *repoPostgres) SaveResponse(reqId int, resp *http.Response) (*models.Response, error) {
+func (rp *repoPostgres) SaveResponse(reqId int, resp *http.Response) (models.Response, error) {
 	var respId int
 	respHeaders := utils.HeadToStr(resp.Header)
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return models.Response{}, err
 	}
 	resp.Body = ioutil.NopCloser(bytes.NewBuffer(respBody))
 
@@ -56,7 +56,7 @@ func (rp *repoPostgres) SaveResponse(reqId int, resp *http.Response) (*models.Re
 		respHeaders,
 		respBody).Scan(&respId)
 
-	response := &models.Response{
+	response := models.Response{
 		Id:        respId,
 		RequestId: reqId,
 		Code:      resp.StatusCode,

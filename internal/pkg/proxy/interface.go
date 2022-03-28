@@ -7,5 +7,5 @@ import (
 
 type RepoProxy interface {
 	SaveRequest(r *http.Request) (int, error)
-	SaveResponse(reqId int, resp *http.Response) (*models.Response, error)
+	SaveResponse(reqId int, resp *http.Response) (models.Response, error)
 }

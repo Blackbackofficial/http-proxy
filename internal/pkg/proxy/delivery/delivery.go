@@ -33,7 +33,6 @@ func (ps *StartServer) ListenAndServe() error {
 			}
 		}),
 	}
-
 	return server.ListenAndServe()
 }
 
@@ -42,7 +41,7 @@ func (ps *StartServer) proxyHTTP(w http.ResponseWriter, r *http.Request) {
 
 	reqId, err := ps.repo.SaveRequest(r)
 	if err != nil {
-		log.Printf("fail save to db: %v", err)
+		log.Printf("Error save: %v", err)
 	}
 
 	resp, err := http.DefaultTransport.RoundTrip(r)
@@ -60,7 +59,7 @@ func (ps *StartServer) proxyHTTP(w http.ResponseWriter, r *http.Request) {
 
 	_, err = ps.repo.SaveResponse(reqId, resp)
 	if err != nil {
-		log.Printf("fail save to db: %v", err)
+		log.Printf("Error save: %v", err)
 	}
 
 	w.WriteHeader(resp.StatusCode)
@@ -80,13 +79,11 @@ func (ps *StartServer) proxyHTTPS(w http.ResponseWriter, r *http.Request) {
 
 	localConn, _, err := hijacker.Hijack()
 	if err != nil {
-		log.Printf("hijacking error: %v", err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 	}
 
 	_, err = localConn.Write([]byte("HTTP/1.1 200 Connection established\r\n\r\n"))
 	if err != nil {
-		log.Printf("handshaking failed: %v", err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		localConn.Close()
 		return
@@ -97,7 +94,6 @@ func (ps *StartServer) proxyHTTPS(w http.ResponseWriter, r *http.Request) {
 
 	tlsConfig, err := utils.GenTLSConf(host, r.URL.Scheme)
 	if err != nil {
-		log.Printf("error getting cert: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -106,7 +102,6 @@ func (ps *StartServer) proxyHTTPS(w http.ResponseWriter, r *http.Request) {
 	err = tlsLocalConn.Handshake()
 	if err != nil {
 		tlsLocalConn.Close()
-		log.Printf("handshaking failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -123,20 +118,17 @@ func (ps *StartServer) proxyHTTPS(w http.ResponseWriter, r *http.Request) {
 	reader := bufio.NewReader(tlsLocalConn)
 	request, err := http.ReadRequest(reader)
 	if err != nil {
-		log.Printf("error getting request: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	requestByte, err := httputil.DumpRequest(request, true)
 	if err != nil {
-		log.Printf("failed to dump request: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	_, err = remoteConn.Write(requestByte)
 	if err != nil {
-		log.Printf("failed to write request: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -144,21 +136,18 @@ func (ps *StartServer) proxyHTTPS(w http.ResponseWriter, r *http.Request) {
 	serverReader := bufio.NewReader(remoteConn)
 	response, err := http.ReadResponse(serverReader, request)
 	if err != nil {
-		log.Printf("failed to read response: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	rawResponse, err := httputil.DumpResponse(response, true)
 	if err != nil {
-		log.Printf("failed to dump response: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	_, err = tlsLocalConn.Write(rawResponse)
 	if err != nil {
-		log.Printf("fail to write response: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -169,32 +158,32 @@ func (ps *StartServer) proxyHTTPS(w http.ResponseWriter, r *http.Request) {
 
 	reqId, err := ps.repo.SaveRequest(request)
 	if err != nil {
-		log.Printf("fail save to db: %v", err)
+		log.Printf("Error save:  %v", err)
 	}
 
 	_, err = ps.repo.SaveResponse(reqId, response)
 	if err != nil {
-		log.Printf("fail save to db: %v", err)
+		log.Printf("Error save:  %v", err)
 	}
 }
 
-func (ps *StartServer) ProxyHTTP(r *http.Request) *models.Response {
+func (ps *StartServer) ProxyHTTP(r *http.Request) models.Response {
 	r.Header.Del("Proxy-Connection")
 
 	reqId, err := ps.repo.SaveRequest(r)
 	if err != nil {
-		log.Printf("fail save to db: %v", err)
+		log.Printf("Error save: %v", err)
 	}
 
 	resp, err := http.DefaultTransport.RoundTrip(r)
 	if err != nil {
-		return nil
+		return models.Response{}
 	}
 	defer resp.Body.Close()
 
 	response, err := ps.repo.SaveResponse(reqId, resp)
 	if err != nil {
-		log.Printf("fail save to db: %v", err)
+		log.Printf("Error save: %v", err)
 	}
 	return response
 }
