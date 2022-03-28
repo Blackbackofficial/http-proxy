@@ -5,9 +5,9 @@ import (
 	"github.com/gorilla/mux"
 	pDelivery "http-proxy/internal/pkg/proxy/delivery"
 	pRepo "http-proxy/internal/pkg/proxy/repo"
-	"http-proxy/internal/pkg/repeater/delivery"
-	"http-proxy/internal/pkg/repeater/repo"
-	"http-proxy/internal/pkg/repeater/usecase"
+	"http-proxy/internal/pkg/scaner/delivery"
+	"http-proxy/internal/pkg/scaner/repo"
+	"http-proxy/internal/pkg/scaner/usecase"
 	"http-proxy/internal/pkg/utils"
 	"log"
 	"net/http"
@@ -51,7 +51,9 @@ func main() {
 
 	newRepo := pRepo.NewRepoPostgres(db)
 	proxyServ := pDelivery.NewProxyServer(newRepo, ":"+conf.Proxy.Port)
-	go log.Fatal(proxyServ.ListenAndServe())
+	go func() {
+		log.Fatal(proxyServ.ListenAndServe())
+	}()
 
 	muxRoute := mux.NewRouter()
 
